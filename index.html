@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Solamente Group</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500&family=Noto+Sans+JP:wght@300;400;500&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --ink:#0d0d0d;--white:#ffffff;--paper:#f8f7f4;--mist:#eeede9;
+      --line:#e0ddd7;--mid:#9e9b95;--gold:#b8954a;--gold-pale:#f4edd9;
+    }
+    html{scroll-behavior:smooth}
+    body{font-family:'Inter','Noto Sans SC','Noto Sans JP',sans-serif;color:var(--ink);background:var(--white);line-height:1.6;overflow-x:hidden}
+    body.lang-ja{font-family:'Inter','Noto Sans JP',sans-serif}
+    body.lang-zh{font-family:'Inter','Noto Sans SC',sans-serif}
+
+    /* INTRO */
+    #intro{position:fixed;inset:0;z-index:999;display:flex;align-items:center;justify-content:center;background:var(--ink);pointer-events:none}
+    #intro-logo{font-family:'Playfair Display',serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:600;color:var(--white);letter-spacing:.05em;opacity:0;transform:translateY(12px);transition:opacity .7s ease,transform .7s ease}
+    #intro-logo span{color:var(--gold)}
+    #intro-logo.show{opacity:1;transform:translateY(0)}
+    #intro-curtain{position:absolute;inset:0;background:var(--ink);transform-origin:top;transform:scaleY(1);transition:transform .9s cubic-bezier(.76,0,.24,1)}
+    #intro.hide #intro-curtain{transform:scaleY(0)}
+    #intro.done{display:none}
+
+    /* NAV */
+    nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:1.25rem 6%;background:rgba(255,255,255,0);transition:background .4s,border-color .4s;border-bottom:1px solid transparent}
+    nav.scrolled{background:rgba(255,255,255,.96);border-bottom-color:var(--line)}
+    .nav-logo{font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:600;color:var(--white);text-decoration:none;letter-spacing:.03em;transition:color .4s}
+    nav.scrolled .nav-logo{color:var(--ink)}
+    .nav-logo span{color:var(--gold)}
+    .nav-links{display:flex;gap:2.25rem;list-style:none}
+    .nav-links a{font-size:.72rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.7);text-decoration:none;transition:color .2s}
+    nav.scrolled .nav-links a{color:var(--mid)}
+    .nav-links a:hover{color:var(--gold)!important}
+    .nav-right{display:flex;align-items:center;gap:.75rem}
+    .lang-sw{display:flex;border:1px solid rgba(255,255,255,.25);overflow:hidden;transition:border-color .4s}
+    nav.scrolled .lang-sw{border-color:var(--line)}
+    .lang-btn{padding:.32rem .56rem;font-size:.66rem;font-weight:500;letter-spacing:.06em;background:transparent;border:none;cursor:pointer;color:rgba(255,255,255,.55);border-right:1px solid rgba(255,255,255,.18);transition:background .18s,color .18s;font-family:inherit}
+    nav.scrolled .lang-btn{color:var(--mid);border-right-color:var(--line)}
+    .lang-btn:last-child{border-right:none}
+    .lang-btn:hover,.lang-btn.active{background:var(--gold);color:var(--white)!important}
+    nav.scrolled .lang-btn.active{background:var(--ink);color:var(--white)!important}
+    .nav-cta{font-size:.7rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--white);background:transparent;border:1px solid rgba(255,255,255,.3);padding:.5rem 1.1rem;text-decoration:none;transition:all .2s;white-space:nowrap}
+    nav.scrolled .nav-cta{color:var(--ink);border-color:var(--ink)}
+    .nav-cta:hover{background:var(--gold);border-color:var(--gold);color:var(--white)!important}
+    .hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer}
+    .hamburger span{width:22px;height:1.5px;background:var(--white);display:block;transition:background .4s}
+    nav.scrolled .hamburger span{background:var(--ink)}
+
+    /* DIR TAG */
+    .dir-tag{display:inline-block;font-size:.52rem;font-weight:600;letter-spacing:.16em;padding:.16rem .4rem;border:1px solid rgba(255,255,255,.22);color:rgba(255,255,255,.45);vertical-align:middle;margin-right:.15rem;font-family:'Inter',sans-serif}
+
+    /* HERO */
+    #hero{min-height:100vh;display:flex;align-items:center;background:var(--ink);padding:0 6%;position:relative;overflow:hidden}
+    .hero-line{position:absolute;left:6%;top:0;bottom:0;width:1px;background:linear-gradient(to bottom,transparent,rgba(184,149,74,.35),transparent)}
+    .hero-deco{position:absolute;right:5%;top:50%;transform:translateY(-50%);font-family:'Playfair Display',serif;font-size:clamp(140px,20vw,300px);color:rgba(255,255,255,.022);line-height:1;pointer-events:none;user-select:none;letter-spacing:-.02em}
+    .hero-content{padding-left:2.5rem}
+    .hero-label{font-size:.65rem;font-weight:500;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);margin-bottom:2rem;display:flex;align-items:center;gap:.75rem}
+    .hero-label::before{content:'';width:24px;height:1px;background:var(--gold)}
+    .hero-h{font-family:'Playfair Display',serif;font-size:clamp(2.4rem,5.5vw,5rem);line-height:1.1;font-weight:400;color:var(--white);max-width:14ch;margin-bottom:2rem}
+    .hero-h em{font-style:italic;color:var(--gold)}
+    .hero-sub{font-size:.92rem;font-weight:300;color:rgba(255,255,255,.45);max-width:46ch;margin-bottom:1.75rem;line-height:1.9}
+    .hero-dirs{display:flex;flex-direction:column;gap:.5rem;margin-bottom:2.5rem}
+    .hero-dir{display:inline-flex;align-items:center;gap:.5rem;font-size:.72rem;font-weight:400;letter-spacing:.06em;color:rgba(255,255,255,.35)}
+    .hero-dir .arr{color:var(--gold)}
+    .hero-btns{display:flex;gap:1rem;flex-wrap:wrap}
+    .btn-solid{display:inline-block;padding:.7rem 1.6rem;background:var(--gold);color:var(--white);border:1px solid var(--gold);font-size:.7rem;font-weight:500;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;transition:all .25s}
+    .btn-solid:hover{background:transparent;color:var(--gold)}
+    .btn-ghost{display:inline-block;padding:.7rem 1.6rem;border:1px solid rgba(255,255,255,.22);color:var(--white);font-size:.7rem;font-weight:500;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;transition:all .25s}
+    .btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
+    .hero-scroll{position:absolute;bottom:2.5rem;left:6%;margin-left:2.5rem;font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.2);display:flex;align-items:center;gap:.75rem}
+    .hero-scroll::after{content:'';width:40px;height:1px;background:rgba(255,255,255,.12);display:inline-block}
+
+    /* SECTIONS */
+    section{padding:7rem 6%}
+    .sec-label{font-size:.62rem;font-weight:500;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem}
+    .sec-title{font-family:'Playfair Display',serif;font-size:clamp(1.8rem,3.2vw,2.8rem);font-weight:400;line-height:1.2;margin-bottom:1.25rem}
+    .sec-body{font-size:.92rem;font-weight:300;color:var(--mid);max-width:52ch;line-height:1.9}
+
+    /* ABOUT */
+    #about{background:var(--white)}
+    .about-wrap{display:grid;grid-template-columns:1fr;gap:4rem;align-items:start;margin-top:4rem;max-width:68ch}
+    .about-rule{width:32px;height:1px;background:var(--gold);margin:2rem 0}
+    .about-dirs{margin-top:2.5rem;border-top:1px solid var(--line)}
+    .about-dir-row{display:grid;grid-template-columns:auto 1fr;gap:1.5rem;padding:1.75rem 0;border-bottom:1px solid var(--line);align-items:start}
+    .about-dir-icon{font-size:.68rem;letter-spacing:.08em;color:var(--gold);font-weight:500;padding-top:.15rem;white-space:nowrap}
+    .about-dir-row h4{font-size:.88rem;font-weight:500;margin-bottom:.4rem}
+    .about-dir-row p{font-size:.82rem;color:var(--mid);line-height:1.75}
+
+    /* TECH BAND */
+    #tech{background:var(--ink);padding:5rem 6%}
+    .tech-inner{display:grid;grid-template-columns:1fr 1fr;gap:6rem;align-items:center}
+    .tech-left .sec-title{color:var(--white)}
+    .tech-left .sec-body{color:rgba(255,255,255,.4)}
+    .tech-left .sec-label{color:var(--gold)}
+    .tech-rule{width:32px;height:1px;background:var(--gold);margin:1.75rem 0}
+    .tech-pills{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1.5rem}
+    .tech-pill{font-size:.65rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;padding:.35rem .8rem;border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.45)}
+    .tech-right{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(255,255,255,.06)}
+    .tech-card{padding:1.75rem 1.5rem;background:var(--ink)}
+    .tech-card-ic{font-size:1.5rem;margin-bottom:.9rem}
+    .tech-card h4{font-size:.82rem;font-weight:500;color:var(--white);margin-bottom:.45rem}
+    .tech-card p{font-size:.76rem;color:rgba(255,255,255,.3);line-height:1.75}
+
+    /* SERVICES */
+    #services{background:var(--paper)}
+    .svc-header{margin-bottom:2.5rem}
+    .svc-grid{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line);border-left:1px solid var(--line)}
+    .svc-item{padding:2.25rem 1.75rem;border-right:1px solid var(--line);border-bottom:1px solid var(--line);transition:background .2s}
+    .svc-item:hover{background:var(--white)}
+    .svc-n{font-family:'Playfair Display',serif;font-size:2rem;color:var(--mist);line-height:1;margin-bottom:1.5rem}
+    .svc-item h3{font-size:.9rem;font-weight:500;margin-bottom:.65rem;letter-spacing:.01em}
+    .svc-item p{font-size:.8rem;color:var(--mid);line-height:1.8}
+    .svc-dots{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:1.1rem}
+    .svc-dot{font-size:.62rem;letter-spacing:.06em;color:var(--gold);padding:.18rem .5rem;border:1px solid var(--gold-pale);background:var(--gold-pale)}
+
+    /* CONTACT */
+    #contact{background:var(--ink);color:var(--white)}
+    .contact-wrap{display:grid;grid-template-columns:1fr 1.1fr;gap:6rem;margin-top:4rem;align-items:start}
+    #contact .sec-title{color:var(--white)}
+    #contact .sec-body{color:rgba(255,255,255,.38)}
+    .c-info{margin-top:2.5rem;display:flex;flex-direction:column;gap:1.5rem}
+    .c-row{display:flex;gap:1.25rem;align-items:flex-start}
+    .c-lbl{font-size:.6rem;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);width:80px;flex-shrink:0;padding-top:.05rem}
+    .c-val{font-size:.82rem;color:rgba(255,255,255,.4);line-height:1.7}
+    .fg{margin-bottom:1rem}
+    .fg label{display:block;font-size:.62rem;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-bottom:.4rem}
+    .fg input,.fg select,.fg textarea{width:100%;padding:.7rem 0;background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,.25);color:var(--white);font-family:inherit;font-size:.85rem;outline:none;transition:border-color .2s;-webkit-appearance:none;border-radius:0}
+    .fg input::placeholder,.fg textarea::placeholder{color:rgba(255,255,255,.38)}
+    .fg input:focus,.fg select:focus,.fg textarea:focus{border-bottom-color:var(--gold)}
+    .fg select option{background:#111}
+    .fg textarea{resize:none;min-height:90px}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem}
+    .f-sub{width:100%;margin-top:1.5rem;padding:.8rem;background:transparent;color:var(--white);border:1px solid rgba(255,255,255,.18);font-family:inherit;font-size:.7rem;font-weight:500;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;transition:all .25s}
+    .f-sub:hover{background:var(--gold);border-color:var(--gold)}
+
+    /* FOOTER */
+    footer{background:#080808;padding:3rem 6%}
+    .ft-top{display:flex;justify-content:space-between;align-items:center;padding-bottom:2rem;border-bottom:1px solid rgba(255,255,255,.06);margin-bottom:2rem;flex-wrap:wrap;gap:2rem}
+    .ft-logo{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:600;color:rgba(255,255,255,.65)}
+    .ft-logo span{color:var(--gold)}
+    .ft-tagline{font-size:.7rem;color:rgba(255,255,255,.18);margin-top:.25rem}
+    .ft-links{display:flex;gap:2rem;flex-wrap:wrap}
+    .ft-links a{font-size:.7rem;color:rgba(255,255,255,.22);text-decoration:none;letter-spacing:.06em;transition:color .2s}
+    .ft-links a:hover{color:var(--gold)}
+    .ft-bot{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem}
+    .ft-copy{font-size:.68rem;color:rgba(255,255,255,.14)}
+    .ft-legal{display:flex;gap:1.5rem}
+    .ft-legal a{font-size:.68rem;color:rgba(255,255,255,.14);text-decoration:none;transition:color .2s}
+    .ft-legal a:hover{color:rgba(255,255,255,.4)}
+
+    /* TEXT LINK */
+    .text-link{display:inline-flex;align-items:center;gap:.4rem;font-size:.7rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--ink);text-decoration:none;transition:gap .2s}
+    .text-link::after{content:'→'}
+    .text-link:hover{gap:.65rem}
+
+    /* REVEAL */
+    .reveal{opacity:0;transform:translateY(20px);transition:opacity .8s ease,transform .8s ease}
+    .reveal.visible{opacity:1;transform:translateY(0)}
+    .rv1{transition-delay:.1s}.rv2{transition-delay:.2s}.rv3{transition-delay:.3s}
+
+    /* RESPONSIVE */
+    @media(max-width:960px){
+      .svc-grid{grid-template-columns:repeat(2,1fr)}
+      .contact-wrap{grid-template-columns:1fr;gap:3rem}
+      .tech-inner{grid-template-columns:1fr;gap:3rem}
+      .tech-right{grid-template-columns:repeat(2,1fr)}
+    }
+    @media(max-width:640px){
+      nav{padding:1rem 5%}.nav-links,.nav-cta{display:none}.hamburger{display:flex}
+      section{padding:5rem 5%}#hero{padding:0 5%}.hero-content{padding-left:1.25rem}
+      #tech{padding:4rem 5%}
+      .svc-grid{grid-template-columns:1fr}
+      .form-row{grid-template-columns:1fr}
+      .ft-top{flex-direction:column;align-items:flex-start}.ft-bot{flex-direction:column;align-items:flex-start}
+    }
+  </style>
+</head>
+<body class="lang-ja">
+
+<!-- INTRO -->
+<div id="intro">
+  <div id="intro-logo">Solamente<span>.</span></div>
+  <div id="intro-curtain"></div>
+</div>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="#hero" class="nav-logo">Solamente<span>.</span></a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#about" data-i18n="n.about">About</a></li>
+    <li><a href="#tech" data-i18n="n.tech">Technology</a></li>
+    <li><a href="#services" data-i18n="n.services">Services</a></li>
+    <li><a href="#contact" data-i18n="n.contact">Contact</a></li>
+  </ul>
+  <div class="nav-right">
+    <div class="lang-sw">
+      <button class="lang-btn" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" onclick="setLang('zh')">中文</button>
+      <button class="lang-btn active" onclick="setLang('ja')">日本語</button>
+    </div>
+    <a href="#contact" class="nav-cta" data-i18n="n.cta">Get in Touch</a>
+  </div>
+  <div class="hamburger" onclick="toggleMenu()"><span></span><span></span><span></span></div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-line"></div>
+  <div class="hero-deco" aria-hidden="true">越</div>
+  <div class="hero-content">
+    <p class="hero-label" data-i18n="h.label">Technology-Driven D2C Brand Operator</p>
+    <h1 class="hero-h" data-i18n="h.headline">日本市場で<br>勝つブランドを<br><em>共に創る。</em></h1>
+    <p class="hero-sub" data-i18n="h.sub">We help D2C brands grow across borders — using technology, data, and deep market expertise. Overseas brands into Japan. Japanese brands into the world.</p>
+    <div class="hero-dirs">
+      <span class="hero-dir"><span class="dir-tag">GLOBAL</span><span data-i18n="h.d1a">Overseas D2C Brands</span> <span class="arr">→</span> <span class="dir-tag">JP</span></span>
+    </div>
+    <div class="hero-btns">
+      <a href="#contact" class="btn-solid" data-i18n="h.cta1">ご相談を始める</a>
+    </div>
+  </div>
+  <div class="hero-scroll" data-i18n="h.scroll">Scroll</div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="sec-label reveal" data-i18n="a.label">Who We Are</div>
+  <div class="about-wrap">
+    <div>
+      <h2 class="sec-title reveal" data-i18n="a.title">A tech-driven brand operator built to take D2C brands across borders.</h2>
+      <div class="about-rule reveal"></div>
+      <p class="sec-body reveal" data-i18n="a.body1">Solamente was founded by veterans from global technology companies. We believe the future of cross-border brand growth is driven by data and technology — not guesswork.</p>
+      <p class="sec-body reveal" style="margin-top:1rem" data-i18n="a.body2">We don't just help brands sell. We help them build — establishing genuine market presence, brand equity, and loyal customer communities on both sides of the border. Our proprietary technology stack powers every engagement, from consumer intelligence to operational efficiency.</p>
+      <div class="about-dirs reveal">
+        <div class="about-dir-row">
+          <div class="about-dir-icon">GLOBAL → JP</div>
+          <div>
+            <h4 data-i18n="a.d1t">Overseas Brands Into Japan</h4>
+            <p data-i18n="a.d1d">We localize, launch, and grow D2C brands in Japan's highly sophisticated market — building real brand identity, not just storefronts.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TECHNOLOGY -->
+<section id="tech">
+  <div class="tech-inner">
+    <div class="tech-left reveal">
+      <div class="sec-label" data-i18n="tc.label">Technology</div>
+      <h2 class="sec-title" data-i18n="tc.title">Technology is our unfair advantage.</h2>
+      <div class="tech-rule"></div>
+      <p class="sec-body" data-i18n="tc.body1">Our founders built products at scale inside some of the world's most demanding technology companies. We brought that thinking to brand operations — proprietary tools, data pipelines, and automation that make every brand we partner with more efficient and more informed.</p>
+      <p class="sec-body" style="margin-top:1rem" data-i18n="tc.body2">Where other operators rely on intuition, we rely on data. Consumer behavior analytics, competitor benchmarking, pricing intelligence, and campaign performance — all surfaced in real time.</p>
+      <div class="tech-pills">
+        <span class="tech-pill" data-i18n="tp1">Consumer Analytics</span>
+        <span class="tech-pill" data-i18n="tp2">Market Intelligence</span>
+        <span class="tech-pill" data-i18n="tp3">Performance Dashboards</span>
+        <span class="tech-pill" data-i18n="tp4">Automation</span>
+        <span class="tech-pill" data-i18n="tp5">A/B Testing</span>
+        <span class="tech-pill" data-i18n="tp6">Data Pipelines</span>
+      </div>
+    </div>
+    <div class="tech-right reveal">
+      <div class="tech-card">
+        <div class="tech-card-ic">◎</div>
+        <h4 data-i18n="tc1t">Consumer Intelligence</h4>
+        <p data-i18n="tc1d">Deep behavioral analytics across your target market — who buys, why they buy, and how to reach them more efficiently.</p>
+      </div>
+      <div class="tech-card">
+        <div class="tech-card-ic">△</div>
+        <h4 data-i18n="tc2t">Growth Analytics</h4>
+        <p data-i18n="tc2d">Real-time dashboards connecting marketing, e-commerce, and brand health metrics into a single source of truth.</p>
+      </div>
+      <div class="tech-card">
+        <div class="tech-card-ic">⬡</div>
+        <h4 data-i18n="tc3t">Operational Automation</h4>
+        <p data-i18n="tc3d">Automated workflows for inventory, pricing, CRM, and campaign management — reducing cost and human error across the stack.</p>
+      </div>
+      <div class="tech-card">
+        <div class="tech-card-ic">◈</div>
+        <h4 data-i18n="tc4t">Market Benchmarking</h4>
+        <p data-i18n="tc4d">Continuous tracking of competitors, pricing, and category trends in your target markets — so strategy is always grounded in reality.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section id="services">
+  <div class="svc-header">
+    <div class="sec-label reveal" data-i18n="sv.label">What We Do</div>
+    <h2 class="sec-title reveal" data-i18n="sv.title">End-to-End Brand Growth Services</h2>
+  </div>
+  <div class="svc-grid reveal" style="margin-top:1rem">
+      <div class="svc-item"><div class="svc-n">01</div><h3 data-i18n="s1t">Brand Strategy & Positioning</h3><p data-i18n="s1d">We start with brand — defining your Japan narrative, audience, competitive positioning, and visual identity before a single ad runs.</p><div class="svc-dots"><span class="svc-dot">Brand Audit</span><span class="svc-dot">Positioning</span><span class="svc-dot">Identity</span></div></div>
+      <div class="svc-item"><div class="svc-n">02</div><h3 data-i18n="s2t">Localization & Creative</h3><p data-i18n="s2d">Deep cultural adaptation of your brand — tone, copy, visuals, naming, and storytelling — crafted for the Japanese consumer's sensibility.</p><div class="svc-dots"><span class="svc-dot">Copy</span><span class="svc-dot">Creative</span><span class="svc-dot">Naming</span></div></div>
+      <div class="svc-item"><div class="svc-n">03</div><h3 data-i18n="s3t">Data-Driven Marketing</h3><p data-i18n="s3d">Full-funnel performance marketing powered by our analytics platform — across Instagram, LINE, TikTok, YouTube, and search.</p><div class="svc-dots"><span class="svc-dot">Paid</span><span class="svc-dot">SNS</span><span class="svc-dot">Analytics</span></div></div>
+      <div class="svc-item"><div class="svc-n">04</div><h3 data-i18n="s4t">E-Commerce Operations</h3><p data-i18n="s4d">D2C storefront, marketplace management (Rakuten, Amazon Japan, Qoo10), CRM, and retention programs — optimized continuously with data.</p><div class="svc-dots"><span class="svc-dot">D2C</span><span class="svc-dot">Marketplace</span><span class="svc-dot">CRM</span></div></div>
+      <div class="svc-item"><div class="svc-n">05</div><h3 data-i18n="s5t">KOL & Community Building</h3><p data-i18n="s5d">Influencer strategy powered by data — identifying the right voices by audience fit and conversion potential, not just follower count.</p><div class="svc-dots"><span class="svc-dot">KOL</span><span class="svc-dot">Community</span><span class="svc-dot">PR</span></div></div>
+      <div class="svc-item"><div class="svc-n">06</div><h3 data-i18n="s6t">Compliance & Logistics</h3><p data-i18n="s6d">Regulatory submissions, import licensing, and end-to-end fulfillment — handled so your brand can focus on brand-building, not paperwork.</p><div class="svc-dots"><span class="svc-dot">Regulatory</span><span class="svc-dot">3PL</span><span class="svc-dot">Fulfillment</span></div></div>
+  </div>
+</section>
+
+
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="sec-label reveal" data-i18n="ct.label">Get in Touch</div>
+  <div class="contact-wrap">
+    <div class="reveal">
+      <h2 class="sec-title" data-i18n="ct.title">Let's build something that lasts.</h2>
+      <div class="c-info">
+        <div class="c-row"><div class="c-lbl" data-i18n="ct.l.off">Office</div><div class="c-val">大栄ビル５階, 銀座１−１６−７<br>中央区, 東京都</div></div>
+        <div class="c-row"><div class="c-lbl" data-i18n="ct.l.em">Email</div><div class="c-val">contact@solamente-group.com</div></div>
+        <div class="c-row"><div class="c-lbl" data-i18n="ct.l.lg">Languages</div><div class="c-val" data-i18n="ct.langs">EN · 中文 · 日本語</div></div>
+      </div>
+    </div>
+    <form class="reveal" onsubmit="handleSubmit(event)">
+      <div class="form-row">
+        <div class="fg"><label data-i18n="f.fn">First Name</label><input type="text" data-i18n-ph="f.fn.p" placeholder="Jane"/></div>
+        <div class="fg"><label data-i18n="f.ln">Last Name</label><input type="text" data-i18n-ph="f.ln.p" placeholder="Smith"/></div>
+      </div>
+      <div class="fg"><label data-i18n="f.em">Email</label><input type="email" placeholder="jane@brand.com"/></div>
+      <div class="fg"><label data-i18n="f.br">Brand / Company</label><input type="text" data-i18n-ph="f.br.p" placeholder="Your Brand"/></div>
+      <div class="fg">
+        <label data-i18n="f.cat">Category</label>
+        <select>
+          <option value="" data-i18n="f.c0">Select your category...</option>
+          <option data-i18n="f.c1">Fashion & Apparel</option>
+          <option data-i18n="f.c2">Beauty & Skincare</option>
+          <option data-i18n="f.c3">Food & Beverage</option>
+          <option data-i18n="f.c4">Health & Wellness</option>
+          <option data-i18n="f.c5">Home & Lifestyle</option>
+          <option data-i18n="f.c6">Tech & Gadgets</option>
+          <option data-i18n="f.c7">Other D2C</option>
+        </select>
+      </div>
+      <div class="fg"><label data-i18n="f.msg">Message</label><textarea data-i18n-ph="f.msg.p" placeholder="Tell us about your brand and goals..."></textarea></div>
+      <button type="submit" class="f-sub" data-i18n="f.sub">Send →</button>
+    </form>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="ft-top">
+    <div>
+      <div class="ft-logo">Solamente<span>.</span></div>
+      <div class="ft-tagline" data-i18n="ft.tag">Technology-Driven D2C Brand Operator</div>
+    </div>
+    <div class="ft-links">
+      <a href="#about" data-i18n="n.about">About</a>
+      <a href="#tech" data-i18n="n.tech">Technology</a>
+      <a href="#services" data-i18n="n.services">Services</a>
+      <a href="#contact" data-i18n="n.contact">Contact</a>
+    </div>
+  </div>
+  <div class="ft-bot">
+    <div class="ft-copy" data-i18n="ft.copy">© 2026 株式会社Solamente</div>
+    <div class="ft-legal">
+      <a href="#" data-i18n="ft.pp">Privacy</a>
+      <a href="#" data-i18n="ft.ts">Terms</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+const T={
+en:{
+"n.about":"About","n.tech":"Technology","n.services":"Services","n.contact":"Contact","n.cta":"Get in Touch",
+"h.label":"Technology-Driven D2C Brand Operator",
+"h.headline":"Build Brands That<br>Win in<br><em>Japan.</em>",
+"h.sub":"We help overseas D2C brands enter and grow in Japan — using technology, data, and deep market expertise to build brands that last.",
+"h.d1a":"Overseas D2C Brands",
+"h.cta1":"Start a Conversation","h.cta2":"Learn More","h.scroll":"Scroll",
+"a.label":"Who We Are",
+"a.title":"A tech-driven brand operator built to take D2C brands across borders.",
+"a.body1":"Solamente was founded by veterans from global technology companies. We believe the future of cross-border brand growth is driven by data and technology — not guesswork.",
+"a.body2":"We don't just help brands sell. We help them build — establishing genuine market presence, brand equity, and loyal customer communities on both sides of the border. Our proprietary technology stack powers every engagement, from consumer intelligence to operational efficiency.",
+"a.d1t":"Overseas Brands Into Japan","a.d1d":"We localize, launch, and grow D2C brands in Japan's highly sophisticated market — building real brand identity, not just storefronts.",
+"tc.label":"Technology",
+"tc.title":"Technology is our unfair advantage.",
+"tc.body1":"Our founders built products at scale inside some of the world's most demanding technology companies. We brought that thinking to brand operations — proprietary tools, data pipelines, and automation that make every brand we partner with more efficient and more informed.",
+"tc.body2":"Where other operators rely on intuition, we rely on data. Consumer behavior analytics, competitor benchmarking, pricing intelligence, and campaign performance — all surfaced in real time.",
+"tp1":"Consumer Analytics","tp2":"Market Intelligence","tp3":"Performance Dashboards","tp4":"Automation","tp5":"A/B Testing","tp6":"Data Pipelines",
+"tc1t":"Consumer Intelligence","tc1d":"Deep behavioral analytics across your target market — who buys, why they buy, and how to reach them more efficiently.",
+"tc2t":"Growth Analytics","tc2d":"Real-time dashboards connecting marketing, e-commerce, and brand health metrics into a single source of truth.",
+"tc3t":"Operational Automation","tc3d":"Automated workflows for inventory, pricing, CRM, and campaign management — reducing cost and human error across the stack.",
+"tc4t":"Market Benchmarking","tc4d":"Continuous tracking of competitors, pricing, and category trends in your target markets — so strategy is always grounded in reality.",
+"sv.label":"What We Do","sv.title":"End-to-End Brand Growth Services",
+"s1t":"Brand Strategy & Positioning","s1d":"We start with brand — defining your Japan narrative, audience, competitive positioning, and visual identity before a single ad runs.",
+"s2t":"Localization & Creative","s2d":"Deep cultural adaptation of your brand — tone, copy, visuals, naming, and storytelling — crafted for the Japanese consumer's sensibility.",
+"s3t":"Data-Driven Marketing","s3d":"Full-funnel performance marketing powered by our analytics platform — across Instagram, LINE, TikTok, YouTube, and search.",
+"s4t":"E-Commerce Operations","s4d":"D2C storefront, marketplace management (Rakuten, Amazon Japan, Qoo10), CRM, and retention programs — optimized continuously with data.",
+"s5t":"KOL & Community Building","s5d":"Influencer strategy powered by data — identifying the right voices by audience fit and conversion potential, not just follower count.",
+"s6t":"Compliance & Logistics","s6d":"Regulatory submissions, import licensing, and end-to-end fulfillment — handled so your brand can focus on brand-building, not paperwork.",
+"ct.label":"Get in Touch","ct.title":"Let's build something that lasts.",
+"ct.l.off":"Office","ct.l.em":"Email","ct.l.lg":"Languages","ct.langs":"EN · 中文 · 日本語",
+"f.fn":"First Name","f.fn.p":"Jane","f.ln":"Last Name","f.ln.p":"Smith","f.em":"Email","f.br":"Brand / Company","f.br.p":"Your Brand",
+"f.cat":"Category","f.c0":"Select your category...","f.c1":"Fashion & Apparel","f.c2":"Beauty & Skincare","f.c3":"Food & Beverage","f.c4":"Health & Wellness","f.c5":"Home & Lifestyle","f.c6":"Tech & Gadgets","f.c7":"Other D2C",
+"f.msg":"Message","f.msg.p":"Tell us about your brand and goals...","f.sub":"Send →","f.ok":"✓ Sent — we'll be in touch.",
+"ft.tag":"Technology-Driven D2C Brand Operator","ft.copy":"© 2026 株式会社Solamente","ft.pp":"Privacy","ft.ts":"Terms"
+},
+zh:{
+"n.about":"关于我们","n.tech":"技术","n.services":"服务","n.contact":"联系我们","n.cta":"立即咨询",
+"h.label":"科技驱动的 D2C 品牌运营商",
+"h.headline":"打造在日本<br>赢得市场<br><em>的品牌。</em>",
+"h.sub":"我们帮助海外 D2C 品牌进入日本市场——以科技、数据和深度市场洞察，打造持久的品牌。",
+"h.d1a":"海外 D2C 品牌",
+"h.cta1":"开启对话","h.cta2":"了解更多","h.scroll":"向下滚动",
+"a.label":"关于我们",
+"a.title":"科技驱动的品牌运营商，专为 D2C 品牌跨越国界而生。",
+"a.body1":"Solamente 由全球顶尖科技公司的资深从业者创立。我们坚信，跨境品牌增长的未来由数据和技术驱动，而非经验直觉。",
+"a.body2":"我们不只是帮品牌卖货，而是帮品牌成长——建立真正的市场影响力、品牌资产和忠实用户社群。我们的专属技术平台贯穿每一次合作，从消费者洞察到运营效率，全面赋能。",
+"a.d1t":"海外品牌进入日本","a.d1d":"我们在日本这一全球最挑剔的市场，为 D2C 品牌提供本土化、上线和增长全链路服务——构建真正的品牌认知，而非仅仅开设店铺。",
+"tc.label":"技术能力",
+"tc.title":"科技是我们的核心优势。",
+"tc.body1":"我们的创始人曾在全球最严苛的科技公司打造大规模产品。我们将这种思维方式带入品牌运营——专属工具、数据管道和自动化系统，让每个合作品牌更高效、更智能。",
+"tc.body2":"其他运营商依赖直觉，我们依赖数据。消费者行为分析、竞品基准测试、定价情报、营销效果——全部实时呈现。",
+"tp1":"消费者分析","tp2":"市场情报","tp3":"效果数据看板","tp4":"自动化","tp5":"A/B 测试","tp6":"数据管道",
+"tc1t":"消费者洞察","tc1d":"针对目标市场的深度行为分析——谁在购买、为什么购买、如何更高效地触达他们。",
+"tc2t":"增长分析","tc2d":"连接营销、电商和品牌健康指标的实时数据看板，构建统一的数据真相源。",
+"tc3t":"运营自动化","tc3d":"库存、定价、CRM 和营销管理的自动化工作流——降低全链路成本和人为失误。",
+"tc4t":"市场基准测试","tc4d":"持续追踪目标市场的竞品动态、定价变化和品类趋势——让战略始终立足于现实。",
+"sv.label":"我们的服务","sv.title":"端到端品牌增长服务",
+"s1t":"品牌战略与定位","s1d":"我们从品牌出发——在投放第一条广告之前，先确定您在日本的品牌叙事、目标受众、竞争定位和视觉形象。",
+"s2t":"本地化与创意","s2d":"针对日本消费者感知的品牌深度本土化——调性、文案、视觉、命名和故事构建。",
+"s3t":"数据驱动营销","s3d":"以我们的分析平台为驱动的全漏斗精准营销——覆盖 Instagram、LINE、TikTok、YouTube 及搜索渠道。",
+"s4t":"电商运营","s4d":"D2C 独立站、平台管理（乐天、亚马逊日本、Qoo10）、CRM 和用户留存——以数据持续优化。",
+"s5t":"KOL 与社群运营","s5d":"以数据赋能的达人策略——根据受众匹配度和转化潜力筛选合适的品牌声音，而非单纯看粉丝量。",
+"s6t":"合规与物流","s6d":"法规申报、进口许可及端到端履约——全部交由我们处理，让品牌专注于品牌建设本身。",
+"ct.label":"联系我们","ct.title":"让我们一起打造持久的品牌。",
+"ct.l.off":"办公地址","ct.l.em":"邮箱","ct.l.lg":"服务语言","ct.langs":"中文 · EN · 日本語",
+"f.fn":"名字","f.fn.p":"珍","f.ln":"姓氏","f.ln.p":"史密斯","f.em":"邮箱","f.br":"品牌 / 公司","f.br.p":"您的品牌",
+"f.cat":"品牌品类","f.c0":"请选择品类...","f.c1":"时尚与服装","f.c2":"美妆与护肤","f.c3":"食品与饮料","f.c4":"健康与保健","f.c5":"家居与生活方式","f.c6":"科技与数码","f.c7":"其他 D2C",
+"f.msg":"留言","f.msg.p":"请介绍您的品牌和目标...","f.sub":"提交 →","f.ok":"✓ 已发送——我们将尽快联系您。",
+"ft.tag":"科技驱动的 D2C 品牌运营商","ft.copy":"© 2026 株式会社Solamente","ft.pp":"隐私政策","ft.ts":"服务条款"
+},
+ja:{
+"n.about":"会社概要","n.tech":"テクノロジー","n.services":"サービス","n.contact":"お問い合わせ","n.cta":"お問い合わせ",
+"h.label":"テクノロジードリブンのD2Cブランドオペレーター",
+"h.headline":"日本市場で<br>勝つブランドを<br><em>共に創る。</em>",
+"h.sub":"テクノロジー、データ、そして深い市場知見で、海外D2Cブランドの日本参入と成長を支援します。",
+"h.d1a":"海外D2Cブランド",
+"h.cta1":"ご相談を始める","h.cta2":"詳しく見る","h.scroll":"スクロール",
+"a.label":"会社概要",
+"a.title":"D2Cブランドの越境成長のために生まれた、テクノロジードリブンのブランドオペレーター。",
+"a.body1":"Solamenteは、グローバルテクノロジー企業出身のベテランが創業しました。私たちは、越境ブランド成長の未来はデータとテクノロジーによって駆動されると信じています。",
+"a.body2":"私たちは単に販売を支援するのではなく、ブランドを構築します。本物の市場プレゼンス、ブランドエクイティ、ロイヤルな顧客コミュニティを国境の両側で確立します。独自のテクノロジースタックが、消費者インテリジェンスから運営効率まで、すべてのエンゲージメントを支えます。",
+"a.d1t":"海外ブランドの日本参入","a.d1d":"日本の高度な市場でD2Cブランドをローカライズし、ローンチし、成長させます——単なる店舗開設ではなく、本物のブランドアイデンティティを構築します。",
+"tc.label":"テクノロジー",
+"tc.title":"テクノロジーが私たちの競争優位です。",
+"tc.body1":"私たちの創業者は、世界で最も要求の厳しいテクノロジー企業でプロダクトを大規模に構築してきました。その思考をブランド運営に持ち込みました——独自ツール、データパイプライン、自動化システムで、パートナーブランドをより効率的かつ情報に基づいて動かします。",
+"tc.body2":"他のオペレーターが直感に頼る中、私たちはデータに頼ります。消費者行動分析、競合ベンチマーク、価格インテリジェンス、キャンペーン効果——すべてリアルタイムで可視化します。",
+"tp1":"消費者アナリティクス","tp2":"マーケットインテリジェンス","tp3":"パフォーマンスダッシュボード","tp4":"自動化","tp5":"A/Bテスト","tp6":"データパイプライン",
+"tc1t":"消費者インテリジェンス","tc1d":"ターゲット市場の深い行動分析——誰が買い、なぜ買い、どうすればより効率的にリーチできるかを解明します。",
+"tc2t":"成長アナリティクス","tc2d":"マーケティング、EC、ブランドヘルス指標をつなぐリアルタイムダッシュボード——唯一の真実の情報源として機能します。",
+"tc3t":"運営自動化","tc3d":"在庫、価格設定、CRM、キャンペーン管理の自動化ワークフロー——スタック全体のコストと人的エラーを削減します。",
+"tc4t":"市場ベンチマーキング","tc4d":"ターゲット市場の競合、価格、カテゴリートレンドを継続的に追跡——戦略が常に現実に根ざしているようにします。",
+"sv.label":"サービス内容","sv.title":"一気通貫のブランド成長サービス",
+"s1t":"ブランド戦略とポジショニング","s1d":"ブランドから始めます——最初の広告を出す前に、日本でのブランドナラティブ、ターゲット、競合ポジショニング、ビジュアルアイデンティティを定義します。",
+"s2t":"ローカライゼーションとクリエイティブ","s2d":"日本の消費者感性に向けたブランドの深い文化適応——トーン、コピー、ビジュアル、ネーミング、ストーリーテリング。",
+"s3t":"データドリブンマーケティング","s3d":"分析プラットフォームで動くフルファネルパフォーマンスマーケティング——Instagram、LINE、TikTok、YouTube、検索を横断して展開。",
+"s4t":"EC運営","s4d":"D2Cストア、マーケットプレイス管理（楽天、Amazon Japan、Qoo10）、CRM、リテンションプログラム——データで継続的に最適化。",
+"s5t":"KOLとコミュニティ構築","s5d":"データで動くインフルエンサー戦略——フォロワー数ではなく、オーディエンスの適合性とコンバージョン可能性で適切な声を特定します。",
+"s6t":"コンプライアンスと物流","s6d":"規制申請、輸入許可、エンドツーエンドフルフィルメント——すべてを担うことで、ブランドはブランド構築に集中できます。",
+"ct.label":"お問い合わせ","ct.title":"長く続くブランドを、共に。",
+"ct.l.off":"オフィス","ct.l.em":"メール","ct.l.lg":"対応言語","ct.langs":"日本語 · EN · 中文",
+"f.fn":"名前","f.fn.p":"太郎","f.ln":"苗字","f.ln.p":"山田","f.em":"メール","f.br":"ブランド / 会社名","f.br.p":"ブランド名",
+"f.cat":"カテゴリー","f.c0":"カテゴリーを選択...","f.c1":"ファッション・アパレル","f.c2":"ビューティー・スキンケア","f.c3":"食品・飲料","f.c4":"ヘルス・ウェルネス","f.c5":"ホーム・ライフスタイル","f.c6":"テック・ガジェット","f.c7":"その他D2C",
+"f.msg":"メッセージ","f.msg.p":"ブランドと目標についてお聞かせください...","f.sub":"送信 →","f.ok":"✓ 送信完了——近日中にご連絡いたします。",
+"ft.tag":"テクノロジードリブンのD2Cブランドオペレーター","ft.copy":"© 2026 株式会社Solamente","ft.pp":"プライバシー","ft.ts":"利用規約"
+}
+};
+
+let lang='ja';
+
+window.addEventListener('load',()=>{
+  const logo=document.getElementById('intro-logo');
+  const intro=document.getElementById('intro');
+  setTimeout(()=>logo.classList.add('show'),200);
+  setTimeout(()=>intro.classList.add('hide'),1400);
+  setTimeout(()=>intro.classList.add('done'),2400);
+  setLang('ja');
+});
+
+function setLang(l){
+  lang=l;const t=T[l];
+  document.body.className='lang-'+l;
+  document.documentElement.lang=l==='zh'?'zh-CN':l==='ja'?'ja':'en';
+  document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.getAttribute('data-i18n');if(t[k]!==undefined)el.innerHTML=t[k];});
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>{const k=el.getAttribute('data-i18n-ph');if(t[k])el.placeholder=t[k];});
+  document.querySelectorAll('.lang-btn').forEach(btn=>btn.classList.remove('active'));
+  const map={en:'EN',zh:'中文',ja:'日本語'};
+  document.querySelectorAll('.lang-btn').forEach(btn=>{if(btn.textContent.trim()===map[l])btn.classList.add('active');});
+}
+
+
+window.addEventListener('scroll',()=>{
+  document.getElementById('nav').classList.toggle('scrolled',scrollY>60);
+  let cur='';
+  document.querySelectorAll('section[id]').forEach(s=>{if(scrollY>=s.offsetTop-130)cur=s.id;});
+  document.querySelectorAll('.nav-links a').forEach(a=>{a.style.color=a.getAttribute('href')==='#'+cur?'var(--gold)':'';});
+});
+
+const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target);}});},{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+
+function toggleMenu(){
+  const l=document.getElementById('navLinks');
+  const open=l.style.display==='flex';
+  Object.assign(l.style,open?{display:'none'}:{display:'flex',flexDirection:'column',position:'absolute',top:'100%',left:'0',right:'0',background:'var(--white)',padding:'1.5rem 5%',gap:'1.25rem',borderTop:'1px solid var(--line)',zIndex:'200'});
+  if(!open)document.querySelectorAll('#navLinks a').forEach(a=>a.style.color='var(--ink)');
+}
+
+function handleSubmit(e){
+  e.preventDefault();
+  const btn=e.target.querySelector('.f-sub');
+  btn.textContent=T[lang]['f.ok']||'✓ Sent';
+  btn.style.cssText='background:var(--ink);color:var(--white);border-color:var(--ink);width:100%;padding:.8rem;font-family:inherit;font-size:.7rem;font-weight:500;letter-spacing:.14em;text-transform:uppercase;cursor:default;margin-top:1.5rem;';
+  btn.disabled=true;
+}
+</script>
+</body>
+</html>
